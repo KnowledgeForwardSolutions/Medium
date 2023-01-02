@@ -1,4 +1,4 @@
-﻿namespace OriginalApi.Settings;
+﻿namespace RefactoredApi.Settings;
 
 public sealed class OutboxSettings
 {

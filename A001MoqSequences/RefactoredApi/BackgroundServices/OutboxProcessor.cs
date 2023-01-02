@@ -1,32 +1,35 @@
-﻿namespace OriginalApi.BackgroundServices;
+﻿namespace RefactoredApi.BackgroundServices;
 
-public sealed class OutboxProcessorService : BackgroundService
+public class OutboxProcessor : IOutboxProcessor
 {
    private readonly IRepository _repository;
    private readonly IMessageQueue _messageQueue;
+   private readonly IAsyncDelayer _delayer;
    private readonly OutboxSettings _settings;
 
-   public OutboxProcessorService(
-      IRepository repository, 
+   public OutboxProcessor(
+      IRepository repository,
       IMessageQueue messageQueue,
+      IAsyncDelayer delayer,
       OutboxSettings settings)
    {
       _repository = repository;
       _messageQueue = messageQueue;
+      _delayer = delayer;
       _settings = settings;
    }
 
-   protected override async Task ExecuteAsync(CancellationToken token)
+   public async Task ProcessOutboxItemsAsync(CancellationToken token)
    {
-      while(!token.IsCancellationRequested)
+      while (!token.IsCancellationRequested)
       {
          var batch = await _repository.GetEventsAsync(_settings.BatchSize);
          await PublishItemsAsync(batch, token);
 
-         if (batch.Count != _settings.BatchSize 
+         if (batch.Count != _settings.BatchSize
             && !token.IsCancellationRequested)
          {
-            await Task.Delay(_settings.PollingInterval, token);
+            await _delayer.Delay(_settings.PollingInterval, token);
          }
       }
    }
@@ -36,7 +39,7 @@ public sealed class OutboxProcessorService : BackgroundService
       CancellationToken token)
    {
       Int64 lastProcessedId = default;
-      foreach(var item in batch)
+      foreach (var item in batch)
       {
          if (token.IsCancellationRequested)
          {
