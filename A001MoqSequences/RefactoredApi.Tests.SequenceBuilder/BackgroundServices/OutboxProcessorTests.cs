@@ -14,7 +14,6 @@ public class OutboxProcessorTests
 
    private readonly IReadOnlyList<UserEvent> _emptyBatch = new List<UserEvent>();
 
-
    [Fact]
    public async void ProcessOutboxItemsAsync_PublishesNoItemsAndDelays_WhenEmptyBatchEncountered()
    {
@@ -22,7 +21,7 @@ public class OutboxProcessorTests
       var cancellationTokenSource = new CancellationTokenSource();
       var token = cancellationTokenSource.Token;
 
-      var (sequence, repository, messageQueue, delayer) = new OutboxProcessorTestSequenceBuilder(_outboxSettings, token)
+      var (repository, messageQueue, delayer) = new OutboxProcessorTestSequenceBuilder(_outboxSettings, token)
          .SetupGetEventsAsync(_emptyBatch)
          .SetupDelayAsync(() => cancellationTokenSource.Cancel())
          .Build();
@@ -46,7 +45,7 @@ public class OutboxProcessorTests
       var cancellationTokenSource = new CancellationTokenSource();
       var token = cancellationTokenSource.Token;
 
-      var (sequence, repository, messageQueue, delayer) = new OutboxProcessorTestSequenceBuilder(_outboxSettings, token)
+      var (repository, messageQueue, delayer) = new OutboxProcessorTestSequenceBuilder(_outboxSettings, token)
          .SetupGetEventsAsync(_outboxEvents[0..2].ToList())
          .SetupPublishEventAsync(_outboxEvents[0])
          .SetupPublishEventAsync(_outboxEvents[1])
@@ -71,7 +70,7 @@ public class OutboxProcessorTests
       var cancellationTokenSource = new CancellationTokenSource();
       var token = cancellationTokenSource.Token;
 
-      var (sequence, repository, messageQueue, delayer) = new OutboxProcessorTestSequenceBuilder(_outboxSettings, token)
+      var (repository, messageQueue, delayer) = new OutboxProcessorTestSequenceBuilder(_outboxSettings, token)
          .SetupGetEventsAsync(_outboxEvents[0..3].ToList())
          .SetupPublishEventAsync(_outboxEvents[0])
          .SetupPublishEventAsync(_outboxEvents[1])
@@ -98,7 +97,7 @@ public class OutboxProcessorTests
       var cancellationTokenSource = new CancellationTokenSource();
       var token = cancellationTokenSource.Token;
 
-      var (sequence, repository, messageQueue, delayer) = new OutboxProcessorTestSequenceBuilder(_outboxSettings, token)
+      var (repository, messageQueue, delayer) = new OutboxProcessorTestSequenceBuilder(_outboxSettings, token)
          .SetupGetEventsAsync(
             _outboxEvents[0..3].ToList(), 
             () => cancellationTokenSource.Cancel())
@@ -121,8 +120,33 @@ public class OutboxProcessorTests
       var cancellationTokenSource = new CancellationTokenSource();
       var token = cancellationTokenSource.Token;
 
-      var (sequence, repository, messageQueue, delayer) = new OutboxProcessorTestSequenceBuilder(_outboxSettings, token)
+      var (repository, messageQueue, delayer) = new OutboxProcessorTestSequenceBuilder(_outboxSettings, token)
          .SetupGetEventsAsync(_outboxEvents[0..3].ToList())
+         .SetupPublishEventAsync(_outboxEvents[0])
+         .SetupPublishEventAsync(
+            _outboxEvents[1],
+            () => cancellationTokenSource.Cancel())
+        .Build();
+
+      var sut = new OutboxProcessor(
+         repository,
+         messageQueue,
+         delayer,
+         _outboxSettings);
+
+      // Act.
+      await sut.ProcessOutboxItemsAsync(token);
+   }
+
+   [Fact]
+   public async void ProcessOutboxItemsAsync_ShouldNotUpdateLastProcessedItemOrWait_WhenCancelledDuringPublishingLastEventInBatch()
+   {
+      // Arrange.
+      var cancellationTokenSource = new CancellationTokenSource();
+      var token = cancellationTokenSource.Token;
+
+      var (repository, messageQueue, delayer) = new OutboxProcessorTestSequenceBuilder(_outboxSettings, token)
+         .SetupGetEventsAsync(_outboxEvents[0..2].ToList())
          .SetupPublishEventAsync(_outboxEvents[0])
          .SetupPublishEventAsync(
             _outboxEvents[1],
@@ -146,7 +170,7 @@ public class OutboxProcessorTests
       var cancellationTokenSource = new CancellationTokenSource();
       var token = cancellationTokenSource.Token;
 
-      var (sequence, repository, messageQueue, delayer) = new OutboxProcessorTestSequenceBuilder(_outboxSettings, token)
+      var (repository, messageQueue, delayer) = new OutboxProcessorTestSequenceBuilder(_outboxSettings, token)
          .SetupGetEventsAsync(_outboxEvents[0..3].ToList())
          .SetupPublishEventAsync(_outboxEvents[0])
          .SetupPublishEventAsync(_outboxEvents[1])
@@ -173,7 +197,7 @@ public class OutboxProcessorTests
       var cancellationTokenSource = new CancellationTokenSource();
       var token = cancellationTokenSource.Token;
 
-      var (sequence, repository, messageQueue, delayer) = new OutboxProcessorTestSequenceBuilder(_outboxSettings, token)
+      var (repository, messageQueue, delayer) = new OutboxProcessorTestSequenceBuilder(_outboxSettings, token)
          // First pass, empty batch.
          .SetupGetEventsAsync(_emptyBatch)
          .SetupDelayAsync()

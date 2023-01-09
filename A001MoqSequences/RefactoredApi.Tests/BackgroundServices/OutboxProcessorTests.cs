@@ -65,10 +65,10 @@ public class OutboxProcessorTests
          .ReturnsAsync(_outboxEvents[0..2].ToList());
       messageQueueMock.InSequence(sequence)
          .Setup(x => x.PublishEventAsync(_outboxEvents[0]))
-         .ReturnsAsync(true);
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
       messageQueueMock.InSequence(sequence)
          .Setup(x => x.PublishEventAsync(_outboxEvents[1]))
-         .ReturnsAsync(true);
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
       repositoryMock.InSequence(sequence)
          .Setup(x => x.UpdateLastProcessedEventIdAsync(_outboxEvents[1].EventId))
          .ReturnsAsync(true);
@@ -105,13 +105,13 @@ public class OutboxProcessorTests
          .ReturnsAsync(_outboxEvents[0..3].ToList());
       messageQueueMock.InSequence(sequence)
          .Setup(x => x.PublishEventAsync(_outboxEvents[0]))
-         .ReturnsAsync(true);
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
       messageQueueMock.InSequence(sequence)
          .Setup(x => x.PublishEventAsync(_outboxEvents[1]))
-         .ReturnsAsync(true);
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
       messageQueueMock.InSequence(sequence)
          .Setup(x => x.PublishEventAsync(_outboxEvents[2]))
-         .ReturnsAsync(true);
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
       repositoryMock.InSequence(sequence)
          .Setup(x => x.UpdateLastProcessedEventIdAsync(_outboxEvents[2].EventId))
          .ReturnsAsync(true);
@@ -179,11 +179,45 @@ public class OutboxProcessorTests
          .ReturnsAsync(_outboxEvents[0..3].ToList());
       messageQueueMock.InSequence(sequence)
          .Setup(x => x.PublishEventAsync(_outboxEvents[0]))
-         .ReturnsAsync(true);
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
       messageQueueMock.InSequence(sequence)
          .Setup(x => x.PublishEventAsync(_outboxEvents[1]))
          .Callback(() => cancellationTokenSource.Cancel())
-         .ReturnsAsync(true);
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
+
+      var sut = new OutboxProcessor(
+         repositoryMock.Object,
+         messageQueueMock.Object,
+         delayerMock.Object,
+         _outboxSettings);
+
+      // Act.
+      await sut.ProcessOutboxItemsAsync(token);
+   }
+
+   [Fact]
+   public async void ProcessOutboxItemsAsync_ShouldNotUpdateLastProcessedItemOrWait_WhenCancelledDuringPublishingLastEventInBatch()
+   {
+      // Arrange.
+      var cancellationTokenSource = new CancellationTokenSource();
+      var token = cancellationTokenSource.Token;
+
+      var repositoryMock = new Mock<IRepository>(MockBehavior.Strict);
+      var messageQueueMock = new Mock<IMessageQueue>(MockBehavior.Strict);
+      var delayerMock = new Mock<IAsyncDelayer>(MockBehavior.Strict);
+
+      var sequence = new MockSequence();
+
+      repositoryMock.InSequence(sequence)
+         .Setup(x => x.GetEventsAsync(_outboxSettings.BatchSize))
+         .ReturnsAsync(_outboxEvents[0..2].ToList());
+      messageQueueMock.InSequence(sequence)
+         .Setup(x => x.PublishEventAsync(_outboxEvents[0]))
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
+      messageQueueMock.InSequence(sequence)
+         .Setup(x => x.PublishEventAsync(_outboxEvents[1]))
+         .Callback(() => cancellationTokenSource.Cancel())
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
 
       var sut = new OutboxProcessor(
          repositoryMock.Object,
@@ -213,13 +247,13 @@ public class OutboxProcessorTests
          .ReturnsAsync(_outboxEvents[0..3].ToList());
       messageQueueMock.InSequence(sequence)
          .Setup(x => x.PublishEventAsync(_outboxEvents[0]))
-         .ReturnsAsync(true);
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
       messageQueueMock.InSequence(sequence)
          .Setup(x => x.PublishEventAsync(_outboxEvents[1]))
-         .ReturnsAsync(true);
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
       messageQueueMock.InSequence(sequence)
          .Setup(x => x.PublishEventAsync(_outboxEvents[2]))
-         .ReturnsAsync(true);
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
       repositoryMock.InSequence(sequence)
          .Setup(x => x.UpdateLastProcessedEventIdAsync(_outboxEvents[2].EventId))
          .Callback(() => cancellationTokenSource.Cancel())
@@ -261,13 +295,13 @@ public class OutboxProcessorTests
          .ReturnsAsync(_outboxEvents[0..3].ToList());
       messageQueueMock.InSequence(sequence)
          .Setup(x => x.PublishEventAsync(_outboxEvents[0]))
-         .ReturnsAsync(true);
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
       messageQueueMock.InSequence(sequence)
          .Setup(x => x.PublishEventAsync(_outboxEvents[1]))
-         .ReturnsAsync(true);
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
       messageQueueMock.InSequence(sequence)
          .Setup(x => x.PublishEventAsync(_outboxEvents[2]))
-         .ReturnsAsync(true);
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
       repositoryMock.InSequence(sequence)
          .Setup(x => x.UpdateLastProcessedEventIdAsync(_outboxEvents[2].EventId))
          .ReturnsAsync(true);
@@ -277,7 +311,7 @@ public class OutboxProcessorTests
          .ReturnsAsync(_outboxEvents[3..4].ToList());
       messageQueueMock.InSequence(sequence)
          .Setup(x => x.PublishEventAsync(_outboxEvents[3]))
-         .ReturnsAsync(true);
+         .ReturnsAsync((UserEvent evt) => evt.EventId);
       repositoryMock.InSequence(sequence)
          .Setup(x => x.UpdateLastProcessedEventIdAsync(_outboxEvents[3].EventId))
          .ReturnsAsync(true);

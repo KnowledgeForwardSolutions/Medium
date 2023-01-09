@@ -8,7 +8,7 @@ public class OutboxProcessorTestSequenceBuilder
 
    private readonly MockSequence _sequence = new();
 
-   private readonly OutboxSettings _outboxSettings = default!;
+   private readonly OutboxSettings _outboxSettings;
    private readonly CancellationToken _token;
 
    public OutboxProcessorTestSequenceBuilder(
@@ -19,8 +19,8 @@ public class OutboxProcessorTestSequenceBuilder
       _token = token;
    }
 
-   public (MockSequence, IRepository, IMessageQueue, IAsyncDelayer) Build()
-      => (_sequence, _repositoryMock.Object, _messageQueueMock.Object, _delayerMock.Object);
+   public (IRepository, IMessageQueue, IAsyncDelayer) Build()
+      => (_repositoryMock.Object, _messageQueueMock.Object, _delayerMock.Object);
 
    public OutboxProcessorTestSequenceBuilder SetupDelayAsync(Action? callback = null)
    {
@@ -41,7 +41,7 @@ public class OutboxProcessorTestSequenceBuilder
    {
       var setup = _repositoryMock.InSequence(_sequence)
          .Setup(x => x.GetEventsAsync(_outboxSettings.BatchSize));
-      if (callback != null)
+      if (callback is not null)
       {
          setup.Callback(() => callback());
       }
@@ -56,11 +56,11 @@ public class OutboxProcessorTestSequenceBuilder
    {
       var setup = _messageQueueMock.InSequence(_sequence)
          .Setup(x => x.PublishEventAsync(userEvent));
-      if (callback != null)
+      if (callback is not null)
       {
          setup.Callback(() => callback());
       }
-      setup.ReturnsAsync(true);
+      setup.ReturnsAsync((UserEvent evt) => evt.EventId);
 
       return this;
    }
@@ -71,7 +71,7 @@ public class OutboxProcessorTestSequenceBuilder
    {
       var setup = _repositoryMock.InSequence(_sequence)
          .Setup(x => x.UpdateLastProcessedEventIdAsync(eventId));
-      if (callback != null)
+      if (callback is not null)
       {
          setup.Callback(() => callback());
       }

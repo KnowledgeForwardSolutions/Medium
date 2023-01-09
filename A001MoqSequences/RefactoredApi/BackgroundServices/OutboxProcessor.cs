@@ -50,7 +50,7 @@ public class OutboxProcessor : IOutboxProcessor
          lastProcessedId = item.EventId;
       }
 
-      if (batch.Count > 0)
+      if (batch.Count > 0 && !token.IsCancellationRequested)
       {
          await _repository.UpdateLastProcessedEventIdAsync(lastProcessedId);
       }

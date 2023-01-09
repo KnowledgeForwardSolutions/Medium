@@ -2,5 +2,5 @@
 
 public interface IMessageQueue
 {
-   Task<Boolean> PublishEventAsync(UserEvent userEvent);
+   Task<Int64> PublishEventAsync(UserEvent userEvent);
 }
