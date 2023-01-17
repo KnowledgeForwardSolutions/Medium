@@ -15,7 +15,7 @@ public class OutboxProcessorTests
    private readonly IReadOnlyList<UserEvent> _emptyBatch = new List<UserEvent>();
 
    [Fact]
-   public async void ProcessOutboxItemsAsync_PublishesNoItemsAndDelays_WhenEmptyBatchEncountered()
+   public async Task ProcessOutboxItemsAsync_PublishesNoItemsAndDelays_WhenEmptyBatchEncountered()
    {
       // Arrange.
       var cancellationTokenSource = new CancellationTokenSource();
@@ -48,7 +48,7 @@ public class OutboxProcessorTests
    }
 
    [Fact]
-   public async void ProcessOutboxItemsAsync_PublishesBatchItemsAndDelays_WhenPartialBatchEncountered()
+   public async Task ProcessOutboxItemsAsync_PublishesBatchItemsAndDelays_WhenPartialBatchEncountered()
    {
       // Arrange.
       var cancellationTokenSource = new CancellationTokenSource();
@@ -88,7 +88,7 @@ public class OutboxProcessorTests
    }
 
    [Fact]
-   public async void ProcessOutboxItemsAsync_PublishesBatchItemsAndDoesNotDelay_WhenFullBatchEncountered()
+   public async Task ProcessOutboxItemsAsync_PublishesBatchItemsAndDoesNotDelay_WhenFullBatchEncountered()
    {
       // Arrange.
       var cancellationTokenSource = new CancellationTokenSource();
@@ -134,7 +134,7 @@ public class OutboxProcessorTests
    }
 
    [Fact]
-   public async void ProcessOutboxItemsAsync_DoesNotPublishAndExits_WhenCancelledDuringGetEvents()
+   public async Task ProcessOutboxItemsAsync_DoesNotPublishAndExits_WhenCancelledDuringGetEvents()
    {
       // Arrange.
       var cancellationTokenSource = new CancellationTokenSource();
@@ -162,7 +162,7 @@ public class OutboxProcessorTests
    }
 
    [Fact]
-   public async void ProcessOutboxItemsAsync_PublishesPartialBatchAndExits_WhenCancelledDuringPublish()
+   public async Task ProcessOutboxItemsAsync_PublishesPartialBatchAndExits_WhenCancelledDuringPublish()
    {
       // Arrange.
       var cancellationTokenSource = new CancellationTokenSource();
@@ -196,7 +196,7 @@ public class OutboxProcessorTests
    }
 
    [Fact]
-   public async void ProcessOutboxItemsAsync_ShouldNotUpdateLastProcessedItemOrWait_WhenCancelledDuringPublishingLastEventInBatch()
+   public async Task ProcessOutboxItemsAsync_ShouldNotUpdateLastProcessedItemOrWait_WhenCancelledDuringPublishingLastEventInBatch()
    {
       // Arrange.
       var cancellationTokenSource = new CancellationTokenSource();
@@ -230,7 +230,7 @@ public class OutboxProcessorTests
    }
 
    [Fact]
-   public async void ProcessOutboxItemsAsync_PublishesEntireBatchThenUpdatesLastProcessedItemAndExits_WhenCancelledDuringUpdateLastProcessed()
+   public async Task ProcessOutboxItemsAsync_PublishesEntireBatchThenUpdatesLastProcessedItemAndExits_WhenCancelledDuringUpdateLastProcessed()
    {
       // Arrange.
       var cancellationTokenSource = new CancellationTokenSource();
@@ -270,7 +270,7 @@ public class OutboxProcessorTests
    }
 
    [Fact]
-   public async void ProcessOutboxItemsAsync_PublishesMultipleBatches_WhenHandlingLargeEventStream()
+   public async Task ProcessOutboxItemsAsync_PublishesMultipleBatches_WhenHandlingLargeEventStream()
    {
       // Arrange.
       var cancellationTokenSource = new CancellationTokenSource();
