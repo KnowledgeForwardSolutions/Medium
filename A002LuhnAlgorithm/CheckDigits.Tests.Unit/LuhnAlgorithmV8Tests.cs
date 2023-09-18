@@ -5,8 +5,16 @@ namespace CheckDigits.Tests.Unit;
 public class LuhnAlgorithmV8Tests
 {
    [Theory]
-   [InlineData("26")]
-   [InlineData("75")]
+   [InlineData("00")]                  // Expanded tests to cover doubling lookup table
+   [InlineData("18")]                  // "
+   [InlineData("26")]                  // "
+   [InlineData("34")]                  // "
+   [InlineData("42")]                  // "
+   [InlineData("59")]                  // "
+   [InlineData("67")]                  // "
+   [InlineData("75")]                  // "
+   [InlineData("83")]                  // "
+   [InlineData("91")]                  // "
    [InlineData("133")]
    [InlineData("5555555555554444")]    // MasterCard test credit card number
    [InlineData("4012888888881881")]    // Visa test credit card number
