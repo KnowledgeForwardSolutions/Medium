@@ -1,1 +1,1 @@
-﻿BenchmarkRunner.Run<LuhnAlgorithmBenchmarks>();
+﻿BenchmarkRunner.Run<BarcodeAlgorithmBenchmarks>();

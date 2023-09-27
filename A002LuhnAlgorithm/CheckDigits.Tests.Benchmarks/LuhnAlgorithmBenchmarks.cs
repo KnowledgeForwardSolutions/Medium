@@ -1,5 +1,7 @@
 ﻿// Ignore Spelling: Luhn
 
+using CheckDigits.LuhnAlgorithmVersions;
+
 namespace CheckDigits.Tests.Benchmarks;
 
 [MemoryDiagnoser]
