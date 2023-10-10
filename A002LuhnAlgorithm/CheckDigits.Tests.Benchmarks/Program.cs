@@ -1,1 +1,1 @@
-﻿BenchmarkRunner.Run<BarcodeAlgorithmBenchmarks>();
+﻿BenchmarkRunner.Run<PerformanceBenchmarks>();
