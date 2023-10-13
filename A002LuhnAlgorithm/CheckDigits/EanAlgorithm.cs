@@ -2,6 +2,9 @@
 
 namespace CheckDigits;
 
+/// <summary>
+///   The final, optimized implementation.
+/// </summary>
 public static class EanAlgorithm
 {
    public static Boolean ValidateCheckDigit(String str)
